@@ -1,0 +1,22 @@
+$ cd /workspace/shadcn-ui
+$ mkdir -p public/audio
+
+$ pnpm run lint
+
+
+> shadcnui@ lint /workspace/shadcn-ui
+> eslint --quiet ./src
+
+
+/workspace/shadcn-ui/src/components/SerialPanel.tsx
+  60:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/shadcn-ui/src/lib/audioManager.ts
+  14:66  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/shadcn-ui/src/lib/serialManager.ts
+  36:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 3 problems (3 errors, 0 warnings)
+
+ ELIFECYCLE  Command failed with exit code 1.

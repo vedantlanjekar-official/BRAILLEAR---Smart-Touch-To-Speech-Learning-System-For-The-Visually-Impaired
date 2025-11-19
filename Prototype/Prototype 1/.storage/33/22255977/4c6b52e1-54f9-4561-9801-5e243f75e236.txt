@@ -1,0 +1,65 @@
+$ cd /workspace/shadcn-ui
+$ mkdir -p public/audio
+
+$ pnpm run lint
+
+
+> shadcnui@ lint /workspace/shadcn-ui
+> eslint --quiet ./src
+
+
+/workspace/shadcn-ui/src/components/SerialPanel.tsx
+  60:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/shadcn-ui/src/lib/audioManager.ts
+  14:66  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/shadcn-ui/src/lib/serialManager.ts
+  36:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 3 problems (3 errors, 0 warnings)
+
+ ELIFECYCLE  Command failed with exit code 1.
+$ pnpm run build
+
+
+> shadcnui@ build /workspace/shadcn-ui
+> vite build
+
+vite v5.4.19 building for production...
+transforming...
+✓ 1750 modules transformed.
+x Build failed in 4.94s
+error during build:
+src/pages/Landing.tsx (6:2): "TouchIcon" is not exported by "node_modules/.pnpm/lucide-react@0.462.0_react@19.1.1/node_modules/lucide-react/dist/esm/lucide-react.js", imported by "src/pages/Landing.tsx".
+file: /workspace/shadcn-ui/src/pages/Landing.tsx:6:2
+
+4: import { Badge } from '@/components/ui/badge';
+5: import { 
+6:   TouchIcon, 
+     ^
+7:   Volume2, 
+8:   Zap, 
+
+    at getRollupError (file:///workspace/shadcn-ui/node_modules/.pnpm/rollup@4.45.1/node_modules/rollup/dist/es/shared/parseAst.js:401:41)
+    at error (file:///workspace/shadcn-ui/node_modules/.pnpm/rollup@4.45.1/node_modules/rollup/dist/es/shared/parseAst.js:397:42)
+    at Module.error (file:///workspace/shadcn-ui/node_modules/.pnpm/rollup@4.45.1/node_modules/rollup/dist/es/shared/node-entry.js:16830:16)
+    at Module.traceVariable (file:///workspace/shadcn-ui/node_modules/.pnpm/rollup@4.45.1/node_modules/rollup/dist/es/shared/node-entry.js:17279:29)
+    at ModuleScope.findVariable (file:///workspace/shadcn-ui/node_modules/.pnpm/rollup@4.45.1/node_modules/rollup/dist/es/shared/node-entry.js:14925:39)
+    at FunctionScope.findVariable (file:///workspace/shadcn-ui/node_modules/.pnpm/rollup@4.45.1/node_modules/rollup/dist/es/shared/node-entry.js:5620:38)
+    at FunctionBodyScope.findVariable (file:///workspace/shadcn-ui/node_modules/.pnpm/rollup@4.45.1/node_modules/rollup/dist/es/shared/node-entry.js:5620:38)
+    at Identifier.bind (file:///workspace/shadcn-ui/node_modules/.pnpm/rollup@4.45.1/node_modules/rollup/dist/es/shared/node-entry.js:5394:40)
+    at CallExpression.bind (file:///workspace/shadcn-ui/node_modules/.pnpm/rollup@4.45.1/node_modules/rollup/dist/es/shared/node-entry.js:2781:28)
+    at CallExpression.bind (file:///workspace/shadcn-ui/node_modules/.pnpm/rollup@4.45.1/node_modules/rollup/dist/es/shared/node-entry.js:11986:15)
+ ELIFECYCLE  Command failed with exit code 1.
+$ grep -r "TouchIcon" src/
+
+src/pages/Landing.tsx:  TouchIcon, 
+src/pages/Landing.tsx:      icon: <TouchIcon className="h-6 w-6" />,
+src/pages/Landing.tsx:                  <TouchIcon className="h-8 w-8 text-blue-600" />
+$ pnpm run lint
+
+
+> shadcnui@ lint /workspace/shadcn-ui
+> eslint --quiet ./src
+

@@ -1,0 +1,3 @@
+$ cd /workspace/shadcn-ui
+$ mkdir -p public/audio
+

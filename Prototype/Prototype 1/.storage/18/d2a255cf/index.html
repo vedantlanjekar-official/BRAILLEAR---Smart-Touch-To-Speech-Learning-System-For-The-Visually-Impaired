@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="https://public-frontend-cos.metadl.com/mgx/img/favicon.png" type="image/png">
+  <title>BRAILLEAR - Smart Touch-to-Speech Learning System</title>
+  <meta name="description" content="BRAILLEAR: Revolutionizing Braille education through embedded systems and real-time audio feedback. Empowering visually impaired learners with affordable, accessible technology." />
+  <meta name="author" content="Team Cubic Vision" />
+  <meta name="keywords" content="braille, assistive technology, visually impaired, education, raspberry pi, touch sensors, audio feedback, inclusive learning" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://braillear.org/" />
+  <meta property="og:title" content="BRAILLEAR - Smart Touch-to-Speech Learning System" />
+  <meta property="og:description" content="Revolutionizing Braille education through embedded systems and real-time audio feedback for visually impaired learners." />
+  <meta property="og:image" content="https://braillear.org/og-image.jpg" />
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://braillear.org/" />
+  <meta property="twitter:title" content="BRAILLEAR - Smart Touch-to-Speech Learning System" />
+  <meta property="twitter:description" content="Revolutionizing Braille education through embedded systems and real-time audio feedback for visually impaired learners." />
+  <meta property="twitter:image" content="https://braillear.org/twitter-image.jpg" />
+
+  <!-- Accessibility -->
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="color-scheme" content="light" />
+
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <style>
+    /* Custom scrollbar styles */
+    :root {
+      --scrollbar-width: 8px;
+      --scrollbar-track: #f1f5f9;
+      --scrollbar-thumb: #cbd5e1;
+      --scrollbar-thumb-hover: #94a3b8;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --scrollbar-track: #1e293b;
+        --scrollbar-thumb: #475569;
+        --scrollbar-thumb-hover: #64748b;
+      }
+    }
+
+    /* WebKit browsers (Chrome, Safari, Edge) */
+    ::-webkit-scrollbar {
+      width: var(--scrollbar-width);
+      height: var(--scrollbar-width);
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--scrollbar-track);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 4px;
+      transition: background-color 0.2s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--scrollbar-thumb-hover);
+    }
+
+    /* Firefox */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    }
+
+    /* Respect reduced motion preference */
+    @media (prefers-reduced-motion: reduce) {
+      ::-webkit-scrollbar-thumb {
+        transition: none;
+      }
+    }
+
+    /* Loading screen */
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 50%, #e0e7ff 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease-out;
+    }
+
+    .loading-content {
+      text-align: center;
+    }
+
+    .loading-logo {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      animation: pulse 2s infinite;
+    }
+
+    .loading-text {
+      font-size: 24px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #1e293b, #2563eb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .loading-subtitle {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-content">
+      <div class="loading-logo">
+        <span style="color: white; font-size: 32px; font-weight: bold;">B</span>
+      </div>
+      <div class="loading-text">BRAILLEAR</div>
+      <div class="loading-subtitle">Smart Touch-to-Speech Learning System</div>
+    </div>
+  </div>
+
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+
+  <script>
+    // Hide loading screen when app is ready
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+          loadingScreen.style.opacity = '0';
+          setTimeout(() => {
+            loadingScreen.remove();
+          }, 500);
+        }
+      }, 1000);
+    });
+
+    // Accessibility: Skip to main content
+    document.addEventListener('DOMContentLoaded', () => {
+      const skipLink = document.createElement('a');
+      skipLink.href = '#main-content';
+      skipLink.textContent = 'Skip to main content';
+      skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-md';
+      document.body.insertBefore(skipLink, document.body.firstChild);
+    });
+  </script>
+</body>
+
+</html>
