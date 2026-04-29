@@ -11,6 +11,7 @@ character.
 Changelog:
 - v1.0: Initial implementation with UART reception, character parsing,
         LED toggling, and timestamp logging
+- v1.1: Added USB Serial forwarding for web app integration
 """
 
 from machine import Pin, UART
@@ -42,6 +43,7 @@ RECV_BUFFER_SIZE = 32  # Small buffer for incoming characters
 #    (220-470 ohm recommended for standard LEDs at 3.3V)
 # 3. Incoming data format: ASCII characters A-Z followed by optional '\n'
 # 4. Non A-Z characters are ignored
+# 5. Received characters are forwarded to USB Serial for web app via Web Serial API
 
 # ============================================================================
 # GLOBAL STATE
@@ -94,13 +96,23 @@ def toggle_status_led():
 def process_received_char(char_byte):
     """
     Process a received character byte.
-    Prints to REPL and toggles LED if valid A-Z.
+    Prints to REPL, toggles LED, and forwards to USB Serial for web app.
     """
     if is_valid_letter(char_byte):
         char = chr(char_byte)
         timestamp = utime.ticks_ms()
         print(f"[{timestamp}ms] Received: {char}")
         toggle_status_led()
+        
+        # Forward character to USB Serial for web app connection
+        # Web Serial API reads from USB Serial port
+        try:
+            # Write character to USB Serial (stdout)
+            sys.stdout.write(char)
+            sys.stdout.flush()  # Ensure immediate transmission
+        except Exception as e:
+            print(f"ERROR forwarding to USB Serial: {e}")
+        
         return True
     return False
 
@@ -182,4 +194,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

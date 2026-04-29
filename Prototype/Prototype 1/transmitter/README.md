@@ -160,3 +160,5 @@ BAUD = 9600           # UART baudrate
 - Add sensor calibration mode
 - Add statistics logging (touch counts per sensor)
 
+
+

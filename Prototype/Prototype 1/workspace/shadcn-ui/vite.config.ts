@@ -16,4 +16,8 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    port: 5174, // Changed from default 5173 to avoid conflicts
+    open: true, // Automatically open browser
+  },
 }));

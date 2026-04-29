@@ -42,7 +42,7 @@ pnpm run dev
 ```
 
 ### Demo Mode
-1. Open http://localhost:5173
+1. Open http://localhost:5174
 2. Sign in with any email/password combination
 3. Navigate to Dashboard
 4. Click "Start Demo Mode"

@@ -1,33 +1,141 @@
-// Serial communication simulation for BRAILLEAR demo
+// Serial communication for BRAILLEAR hardware integration
 export interface SerialEvent {
   character: string;
   timestamp: Date;
   source: 'hardware' | 'demo';
 }
 
-export type ConnectionStatus = 'connected' | 'demo';
+export type ConnectionStatus = 'disconnected' | 'connected' | 'demo';
 
 export class SerialManager {
-  private status: ConnectionStatus = 'connected';
+  private status: ConnectionStatus = 'disconnected';
   private eventListeners: ((event: SerialEvent) => void)[] = [];
   private statusListeners: ((status: ConnectionStatus) => void)[] = [];
   private demoInterval: NodeJS.Timeout | null = null;
   private isDemoMode: boolean = false;
+  private port: SerialPort | null = null;
+  private reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+  private isReading: boolean = false;
 
   constructor() {
-    // Always assume hardware is connected for demo
-    this.setStatus('connected');
+    // Check Web Serial API support
+    if (!this.isWebSerialSupported()) {
+      console.warn('Web Serial API not supported, falling back to demo mode');
+      this.setStatus('demo');
+    } else {
+      this.setStatus('disconnected');
+    }
   }
 
-  // Simulate hardware connection (always successful)
+  // Connect to hardware via Web Serial API
   async connectToHardware(): Promise<boolean> {
-    this.setStatus('connected');
-    return true;
+    if (!this.isWebSerialSupported()) {
+      console.warn('Web Serial API not supported');
+      this.setStatus('demo');
+      return false;
+    }
+
+    try {
+      // Request port access
+      this.port = await navigator.serial.requestPort();
+      
+      // Open port with configuration matching receiver firmware
+      await this.port.open({
+        baudRate: 9600,
+        dataBits: 8,
+        stopBits: 1,
+        parity: 'none',
+        flowControl: 'none'
+      });
+
+      console.log('Serial port opened successfully');
+      this.setStatus('connected');
+      
+      // Start reading from serial port
+      this.startReading();
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to connect to hardware:', error);
+      this.setStatus('demo');
+      return false;
+    }
+  }
+
+  private async startReading() {
+    if (!this.port || this.isReading) return;
+    
+    this.isReading = true;
+    const decoder = new TextDecoder();
+    
+    try {
+      while (this.port.readable && this.isReading) {
+        this.reader = this.port.readable.getReader();
+        
+        try {
+          while (true) {
+            const { value, done } = await this.reader.read();
+            
+            if (done) {
+              break;
+            }
+            
+            // Decode received bytes
+            const text = decoder.decode(value, { stream: true });
+            
+            // Process each character
+            for (const char of text) {
+              // Filter for valid A-Z characters
+              if (char >= 'A' && char <= 'Z') {
+                this.emitEvent({
+                  character: char,
+                  timestamp: new Date(),
+                  source: 'hardware'
+                });
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error reading from serial port:', error);
+          break;
+        } finally {
+          if (this.reader) {
+            this.reader.releaseLock();
+            this.reader = null;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Serial reading error:', error);
+    } finally {
+      this.isReading = false;
+    }
   }
 
   async disconnect() {
     this.stopDemo();
-    this.setStatus('connected'); // Keep connected for demo
+    this.isReading = false;
+    
+    if (this.reader) {
+      try {
+        await this.reader.cancel();
+        this.reader.releaseLock();
+        this.reader = null;
+      } catch (error) {
+        console.error('Error closing reader:', error);
+      }
+    }
+    
+    if (this.port) {
+      try {
+        await this.port.close();
+        this.port = null;
+      } catch (error) {
+        console.error('Error closing port:', error);
+      }
+    }
+    
+    this.setStatus('disconnected');
   }
 
   // Demo mode functionality
@@ -113,8 +221,12 @@ export class SerialManager {
     return this.status;
   }
 
+  isConnected(): boolean {
+    return this.status === 'connected' && this.port !== null;
+  }
+
   isWebSerialSupported(): boolean {
-    return true; // Always supported for demo
+    return 'serial' in navigator && 'SerialPort' in window;
   }
 }
 

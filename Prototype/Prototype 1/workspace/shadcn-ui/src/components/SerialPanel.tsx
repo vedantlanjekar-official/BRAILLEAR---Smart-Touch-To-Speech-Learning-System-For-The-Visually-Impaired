@@ -14,14 +14,19 @@ import {
 import { serialManager, type ConnectionStatus } from '@/lib/serialManager';
 
 export default function SerialPanel() {
-  const [status, setStatus] = useState<ConnectionStatus>('connected');
+  const [status, setStatus] = useState<ConnectionStatus>('disconnected');
   const [autoPlay, setAutoPlay] = useState(false);
   const [autoInterval, setAutoInterval] = useState('2000');
+  const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
     const unsubscribe = serialManager.onStatusChange((newStatus) => {
       setStatus(newStatus);
+      setIsConnecting(false);
     });
+
+    // Get initial status
+    setStatus(serialManager.getStatus());
 
     return unsubscribe;
   }, []);
@@ -53,12 +58,28 @@ export default function SerialPanel() {
     }
   };
 
+  const handleConnect = async () => {
+    setIsConnecting(true);
+    try {
+      await serialManager.connectToHardware();
+    } catch (error) {
+      console.error('Connection failed:', error);
+      setIsConnecting(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    await serialManager.disconnect();
+  };
+
   const getStatusBadge = () => {
     switch (status) {
       case 'connected':
         return <Badge className="bg-green-100 text-green-700">Hardware Connected</Badge>;
       case 'demo':
         return <Badge className="bg-blue-100 text-blue-700">Demo Mode Active</Badge>;
+      case 'disconnected':
+        return <Badge variant="secondary">Disconnected</Badge>;
       default:
         return <Badge variant="secondary">Ready</Badge>;
     }
@@ -80,15 +101,42 @@ export default function SerialPanel() {
         {/* Connection Controls */}
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button
-              onClick={handleToggleDemo}
-              variant={status === 'demo' ? 'default' : 'outline'}
-              className="flex-1"
-            >
-              <Wifi className="mr-2 h-4 w-4" />
-              {status === 'demo' ? 'Stop Demo Mode' : 'Start Demo Mode'}
-            </Button>
+            {status === 'disconnected' ? (
+              <Button
+                onClick={handleConnect}
+                disabled={isConnecting || !serialManager.isWebSerialSupported()}
+                className="flex-1"
+              >
+                <Usb className="mr-2 h-4 w-4" />
+                {isConnecting ? 'Connecting...' : 'Connect Hardware'}
+              </Button>
+            ) : (
+              <>
+                <Button
+                  onClick={handleDisconnect}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <Usb className="mr-2 h-4 w-4" />
+                  Disconnect
+                </Button>
+                <Button
+                  onClick={handleToggleDemo}
+                  variant={status === 'demo' ? 'default' : 'outline'}
+                  className="flex-1"
+                >
+                  <Wifi className="mr-2 h-4 w-4" />
+                  {status === 'demo' ? 'Stop Demo Mode' : 'Start Demo Mode'}
+                </Button>
+              </>
+            )}
           </div>
+          
+          {!serialManager.isWebSerialSupported() && (
+            <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded border border-amber-200">
+              Web Serial API not supported in this browser. Use Chrome, Edge, or Opera for hardware connection.
+            </div>
+          )}
         </div>
 
         {/* Demo Controls */}
@@ -136,7 +184,8 @@ export default function SerialPanel() {
           <div className="flex justify-between">
             <span>Connection Type:</span>
             <span className="font-medium">
-              {status === 'connected' ? 'Hardware Ready' : 'Demo Simulation'}
+              {status === 'connected' ? 'Hardware Connected' : 
+               status === 'demo' ? 'Demo Simulation' : 'Disconnected'}
             </span>
           </div>
           
@@ -154,13 +203,17 @@ export default function SerialPanel() {
         {/* Instructions */}
         <div className="text-xs text-muted-foreground p-3 bg-slate-50 rounded-lg">
           <p className="font-medium mb-1">Instructions:</p>
-          {status === 'demo' ? (
+          {status === 'connected' ? (
+            <p>
+              Hardware is connected and ready. Touch physical sensors to trigger audio feedback.
+            </p>
+          ) : status === 'demo' ? (
             <p>
               Demo mode is active. Click sensors in the grid below or enable auto-play to simulate touch events.
             </p>
           ) : (
             <p>
-              Hardware is ready. Click sensors below to test or enable demo mode for automatic simulation.
+              Click "Connect Hardware" to connect to your receiver Pico, or start demo mode for testing without hardware.
             </p>
           )}
         </div>

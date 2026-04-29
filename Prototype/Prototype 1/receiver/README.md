@@ -158,3 +158,5 @@ To drive separate LEDs or outputs for each letter:
 - Add buzzer/audio feedback per letter
 - Add display output (OLED/LCD) for received text
 
+
+

@@ -26,7 +26,7 @@ import { audioManager } from '@/lib/audioManager';
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('connected');
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -76,9 +76,11 @@ export default function Dashboard() {
   const getStatusBadge = () => {
     switch (connectionStatus) {
       case 'connected':
-        return <Badge className="bg-green-100 text-green-700">Hardware Ready</Badge>;
+        return <Badge className="bg-green-100 text-green-700">Hardware Connected</Badge>;
       case 'demo':
         return <Badge className="bg-blue-100 text-blue-700">Demo Mode Active</Badge>;
+      case 'disconnected':
+        return <Badge variant="secondary">Disconnected</Badge>;
       default:
         return <Badge variant="secondary">Ready</Badge>;
     }
@@ -132,8 +134,22 @@ export default function Dashboard() {
         <Alert className="mb-6 bg-blue-50 border-blue-200">
           <Info className="h-4 w-4" />
           <AlertDescription>
-            <strong>Demo Ready:</strong> Hardware is connected and ready. 
-            Click any sensor below to test audio feedback or enable demo mode for automatic simulation.
+            {connectionStatus === 'connected' ? (
+              <>
+                <strong>Hardware Connected:</strong> Your receiver Pico is connected and ready. 
+                Touch physical sensors to trigger audio feedback.
+              </>
+            ) : connectionStatus === 'demo' ? (
+              <>
+                <strong>Demo Mode Active:</strong> Click any sensor below to test audio feedback 
+                or enable auto-play for automatic simulation.
+              </>
+            ) : (
+              <>
+                <strong>Get Started:</strong> Connect your receiver Pico hardware or start demo mode 
+                to begin testing the BRAILLEAR system.
+              </>
+            )}
           </AlertDescription>
         </Alert>
 
@@ -184,7 +200,8 @@ export default function Dashboard() {
                   <div className="flex items-center gap-2">
                     <Usb className="h-5 w-5 text-green-600" />
                     <span className="font-semibold">
-                      {connectionStatus === 'connected' ? 'Hardware Ready' : 'Demo Mode'}
+                      {connectionStatus === 'connected' ? 'Hardware Connected' : 
+                       connectionStatus === 'demo' ? 'Demo Mode' : 'Disconnected'}
                     </span>
                   </div>
                 </CardContent>
